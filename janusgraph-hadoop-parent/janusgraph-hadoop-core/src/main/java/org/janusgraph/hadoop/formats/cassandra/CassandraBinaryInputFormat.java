@@ -65,10 +65,14 @@ public class CassandraBinaryInputFormat extends AbstractBinaryInputFormat {
     @Override
     public RecordReader<StaticBuffer, Iterable<Entry>> createRecordReader(final InputSplit inputSplit, final TaskAttemptContext taskAttemptContext)
             throws IOException, InterruptedException {
-        columnFamilyRecordReader =
-                (ColumnFamilyRecordReader)columnFamilyInputFormat.createRecordReader(inputSplit, taskAttemptContext);
-        janusgraphRecordReader =
+        if (Boolean.getBoolean("use.cassandra.3")) { // see issue 172
+            janusgraphRecordReader = new CqlBridgeRecordReader();
+        } else { // the default case, Cassandra 2.1.9
+            columnFamilyRecordReader =
+                (ColumnFamilyRecordReader) columnFamilyInputFormat.createRecordReader(inputSplit, taskAttemptContext);
+            janusgraphRecordReader =
                 new CassandraBinaryRecordReader(columnFamilyRecordReader);
+        }
         return janusgraphRecordReader;
     }
 
