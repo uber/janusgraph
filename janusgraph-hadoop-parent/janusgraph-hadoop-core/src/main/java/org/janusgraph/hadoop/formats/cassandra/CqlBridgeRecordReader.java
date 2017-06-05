@@ -16,6 +16,7 @@ package org.janusgraph.hadoop.formats.cassandra;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 /**
  * <p> Background: The {@link org.apache.cassandra.hadoop.cql3.CqlRecordReader} class has changed
@@ -123,17 +125,11 @@ public class CqlBridgeRecordReader extends RecordReader<StaticBuffer, Iterable<E
                 .addContactPoints(locations)
                 .build();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unable to create cluster for table: " + cfName + ", in keyspace: " + keyspace, e);
         }
-
-        if (cluster != null) {
-            session = cluster.connect(quote(keyspace));
-        }
-
-        if (session == null) {
-            throw new RuntimeException("Can't create connection session");
-        }
-
+        // cluster should be represent to a valid cluster now
+        session = cluster.connect(quote(keyspace));
+        Preconditions.checkState(session != null, "Can't create connection session");
         //get negotiated serialization protocol
         nativeProtocolVersion = cluster.getConfiguration().getProtocolOptions().getProtocolVersion().toInt();
 
@@ -203,23 +199,20 @@ public class CqlBridgeRecordReader extends RecordReader<StaticBuffer, Iterable<E
     }
 
     public boolean nextKeyValue() throws IOException {
-        Map<StaticArrayBuffer, Map<StaticBuffer, StaticBuffer>> kv = distinctKeyIterator.next();
+        final Map<StaticArrayBuffer, Map<StaticBuffer, StaticBuffer>> kv = distinctKeyIterator.next();
         if (kv == null) {
             return false;
-        } else {
-            int size = kv.size();
-            assert size == 1 : "There should be one entry in key value map, found: " + size;
-            Map.Entry<StaticArrayBuffer, Map<StaticBuffer, StaticBuffer>> onlyEntry = kv.entrySet().iterator().next();
-            KV newKV = new KV(onlyEntry.getKey());
-            Map<StaticBuffer, StaticBuffer> v = onlyEntry.getValue();
-            List<Entry> entries = v.keySet()
+        }
+        final Map.Entry<StaticArrayBuffer, Map<StaticBuffer, StaticBuffer>> onlyEntry = Iterables.getOnlyElement(kv.entrySet());
+        final KV newKV = new KV(onlyEntry.getKey());
+        final Map<StaticBuffer, StaticBuffer> v = onlyEntry.getValue();
+        final List<Entry> entries = v.keySet()
                 .stream()
                 .map(column -> StaticArrayEntry.of(column, v.get(column)))
-                .collect(toCollection(() -> new ArrayList<>(v.size())));
-            newKV.addEntries(entries);
-            currentKV = newKV;
-            return true;
-        }
+                .collect(toList());
+        newKV.addEntries(entries);
+        currentKV = newKV;
+        return true;
     }
 
     /**
@@ -237,6 +230,9 @@ public class CqlBridgeRecordReader extends RecordReader<StaticBuffer, Iterable<E
      * with a single key in JanusGraph's use of Cassandra.
      */
     private class DistinctKeyIterator implements Iterator<Map<StaticArrayBuffer, Map<StaticBuffer, StaticBuffer>>> {
+        public static final String KEY = "key";
+        public static final String COLUMN_NAME = "column1";
+        public static final String VALUE = "value";
         private final Iterator<Row> rowIterator;
         long totalRead;
         Row previousRow = null;
@@ -281,23 +277,22 @@ public class CqlBridgeRecordReader extends RecordReader<StaticBuffer, Iterable<E
             } else {
                 row = previousRow;
             }
-            StaticArrayBuffer key = StaticArrayBuffer.of(row.getBytesUnsafe("key"));
-            StaticBuffer column1 = StaticArrayBuffer.of(row.getBytesUnsafe("column1"));
-            StaticBuffer value = StaticArrayBuffer.of(row.getBytesUnsafe("value"));
+            StaticArrayBuffer key = StaticArrayBuffer.of(row.getBytesUnsafe(KEY));
+            StaticBuffer column1 = StaticArrayBuffer.of(row.getBytesUnsafe(COLUMN_NAME));
+            StaticBuffer value = StaticArrayBuffer.of(row.getBytesUnsafe(VALUE));
             Map<StaticBuffer, StaticBuffer> cvs = new HashMap<>();
             cvs.put(column1, value);
             kcvs.put(key, cvs);
             while (rowIterator.hasNext()) {
                 Row nextRow = rowIterator.next();
-                StaticArrayBuffer nextKey = StaticArrayBuffer.of(nextRow.getBytesUnsafe("key"));
+                StaticArrayBuffer nextKey = StaticArrayBuffer.of(nextRow.getBytesUnsafe(KEY));
                 if (! key.equals(nextKey)) {
                     previousRow = nextRow;
                     break;
-                } else {
-                    StaticBuffer nextColumn = StaticArrayBuffer.of(nextRow.getBytesUnsafe("column1"));
-                    StaticBuffer nextValue = StaticArrayBuffer.of(nextRow.getBytesUnsafe("value"));
-                    cvs.put(nextColumn, nextValue);
                 }
+                StaticBuffer nextColumn = StaticArrayBuffer.of(nextRow.getBytesUnsafe(COLUMN_NAME));
+                StaticBuffer nextValue = StaticArrayBuffer.of(nextRow.getBytesUnsafe(VALUE));
+                cvs.put(nextColumn, nextValue);
                 totalRead++;
             }
             return kcvs;
