@@ -57,7 +57,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -70,6 +69,7 @@ import static java.util.stream.Collectors.toList;
  * @see <a href="https://github.com/JanusGraph/janusgraph/issues/172">Issue 172</a>.
  */
 @Unstable // Because it should go away with JanusGraph upgrading to Cassandra-3 for OLAP
+@Deprecated // Because this class should already be on its path to deprecation
 public class CqlBridgeRecordReader extends RecordReader<StaticBuffer, Iterable<Entry>> {
 
     /* Implementation note: This is inspired by Cassandra-3's org/apache/cassandra/hadoop/cql3/CqlRecordReader.java */
