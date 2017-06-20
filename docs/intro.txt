@@ -108,7 +108,7 @@ The examples in this section make extensive use of a toy graph distributed with 
 
 .Graph of the Gods
 image::graph-of-the-gods-2.png[]
-[cols="1, 4", options="header"]
+[options="header"]
 |=====
 |visual symbol      | meaning
 |bold key           |a graph indexed key
@@ -186,6 +186,16 @@ For those using JanusGraph/Cassandra (or JanusGraph/HBase), be sure to make use 
 gremlin> graph = JanusGraphFactory.open('conf/janusgraph-cassandra-es.properties')
 ==>standardjanusgraph[cassandrathrift:[127.0.0.1]]
 gremlin> GraphOfTheGodsFactory.load(graph)
+==>null
+gremlin> g = graph.traversal()
+==>graphtraversalsource[standardjanusgraph[cassandrathrift:[127.0.0.1]], standard]
+
+You may also use the `conf/janusgraph-cassandra.properties`, `conf/janusgraph-berkeleyje.properties`, or `conf/janusgraph-hbase.properties` configuration files to open a graph without an indexing backend configured. In such cases, you will need to use the `GraphOfTheGodsFactory.loadWithoutMixedIndex()` method to load the _Graph of the Gods_ so that it doesn't attempt to make use of an indexing backend.
+
+[source, gremlin]
+gremlin> graph = JanusGraphFactory.open('conf/janusgraph-cassandra.properties')
+==>standardjanusgraph[cassandrathrift:[127.0.0.1]]
+gremlin> GraphOfTheGodsFactory.loadWithoutMixedIndex(graph, true)
 ==>null
 gremlin> g = graph.traversal()
 ==>graphtraversalsource[standardjanusgraph[cassandrathrift:[127.0.0.1]], standard]

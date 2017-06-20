@@ -1,16 +1,25 @@
 ![JanusGraph logo](janusgraph.png)
 
-JanusGraph is a highly scalable [graph database](http://en.wikipedia.org/wiki/Graph_database) optimized for storing and querying large graphs with billions of vertices and edges distributed across a multi-machine cluster. JanusGraph is a transactional database that can support thousands of concurrent users, complex traversals, and analytic graph queries.
+JanusGraph is a highly scalable [graph database](http://en.wikipedia.org/wiki/Graph_database)
+optimized for storing and querying large graphs with billions of vertices and edges
+distributed across a multi-machine cluster. JanusGraph is a transactional database that
+can support thousands of concurrent users, complex traversals, and analytic graph queries.
 
 [![Build Status][travis-shield]][travis-link]
 [![Maven][maven-shield]][maven-link]
+[![Javadoc][javadoc-shield]][javadoc-link]
+[![Coverity Scan][coverity-shield]][coverity-link]
 [![Gitter][gitter-shield]][gitter-link]
 [![Stack Overflow][stackoverflow-shield]][stackoverflow-link]
 
 [travis-shield]: https://travis-ci.org/JanusGraph/janusgraph.svg?branch=master
 [travis-link]: https://travis-ci.org/JanusGraph/janusgraph
-[maven-shield]: https://maven-badges.herokuapp.com/maven-central/org.janusgraph/janusgraph-core/badge.svg
-[maven-link]: http://search.maven.org/#search%7Cga%7C1%7Corg.janusgraph
+[maven-shield]: https://img.shields.io/maven-central/v/org.janusgraph/janusgraph-core.svg
+[maven-link]: https://search.maven.org/#search%7Cga%7C1%7Corg.janusgraph
+[javadoc-shield]: https://javadoc.io/badge/org.janusgraph/janusgraph-core.svg?color=blue
+[javadoc-link]: https://javadoc.io/doc/org.janusgraph/janusgraph-core
+[coverity-shield]: https://img.shields.io/coverity/scan/janusgraph-janusgraph.svg
+[coverity-link]: https://scan.coverity.com/projects/janusgraph-janusgraph
 [gitter-shield]: https://img.shields.io/gitter/room/janusgraph/janusgraph.svg
 [gitter-link]: https://gitter.im/janusgraph/janusgraph
 [stackoverflow-shield]: https://img.shields.io/badge/stackoverflow-janusgraph-blue.svg
@@ -18,7 +27,8 @@ JanusGraph is a highly scalable [graph database](http://en.wikipedia.org/wiki/Gr
 
 ## Learn More
 
-The [project homepage](http://janusgraph.org) contains more information on JanusGraph and provides links to documentation, getting-started guides and release downloads.
+The [project homepage](http://janusgraph.org) contains more information on JanusGraph and
+provides links to documentation, getting-started guides and release downloads.
 
 ## Community
 
@@ -63,5 +73,6 @@ CLAs and best practices for working with GitHub.
 
 The following users have deployed JanusGraph in production.
 
+* [CELUM](https://www.celum.com/) - [use case and system architecture](https://www.celum.com/en/graph-driven-and-reactive-architecture)
 * [FiNC](https://finc.com)
 * [Seeq](https://seeq.com)
