@@ -55,3 +55,12 @@ mvn test -Dtest=BerkeleyJEGraphPerformanceMemoryTest
 # Executes the specified test
 mvn test -Dtest=BerkeleyJEGraphPerformanceMemoryTest -Dtest.skip.mem=false
 ```
+
+### Running Hadoop tests with Cassandra-3 using CQL record reader (requires Docker)
+
+To run Hadoop tests with Cassandra-3 using the CQL record reader, start a Cassandra-3 Docker container and run tests with `-DskipCassandra3=false`. Note core HBase and Cassandra-2 Hadoop tests must be skipped when an external Cassandra instance is running.
+
+```bash
+docker run --name jg-cassandra -p 9160:9160 -p 9042:9042 -e CASSANDRA_START_RPC=true -d cassandra:3.10
+mvn clean install -pl :janusgraph-hadoop-2 -DskipHBase -DskipCassandra -DskipCassandra3=false
+```
